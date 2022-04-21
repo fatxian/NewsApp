@@ -1,19 +1,21 @@
 package com.androiddevs.mvvmnewsapp.ui.fragment
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.AbsListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.androiddevs.mvvmnewsapp.R
 import com.androiddevs.mvvmnewsapp.adapter.NewsAdapter
-import com.androiddevs.mvvmnewsapp.ui.NewsActivity
+import com.androiddevs.mvvmnewsapp.db.ArticleDatabase
+import com.androiddevs.mvvmnewsapp.repository.NewsRepository
 import com.androiddevs.mvvmnewsapp.ui.NewsViewModel
+import com.androiddevs.mvvmnewsapp.ui.NewsViewModelProviderFactory
 import com.androiddevs.mvvmnewsapp.util.Constants.Companion.QUERY_PAGE_SIZE
 import com.androiddevs.mvvmnewsapp.util.Resource
 import kotlinx.android.synthetic.main.fragment_breaking_news.*
@@ -22,14 +24,16 @@ import kotlinx.android.synthetic.main.fragment_search_news.paginationProgressBar
 
 class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
-    lateinit var viewModel: NewsViewModel
+    private val viewModel by activityViewModels<NewsViewModel>{
+        val newsRepository = NewsRepository(ArticleDatabase(requireContext()))
+        NewsViewModelProviderFactory(requireActivity().application, newsRepository)
+    }
     lateinit var newsAdapter: NewsAdapter
 
     val TAG = "BreakingNewsFragment"
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = (activity as NewsActivity).viewModel
         setupRecyclerView()
 
         //點擊文章

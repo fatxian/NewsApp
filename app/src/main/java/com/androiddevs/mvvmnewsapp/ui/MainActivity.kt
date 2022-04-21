@@ -7,6 +7,12 @@ import com.androiddevs.mvvmnewsapp.R
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //splash -> activity
+        setTheme(R.style.AppTheme)
+
         setContentView(R.layout.activity_main)
+
+        
     }
 }
