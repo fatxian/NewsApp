@@ -10,4 +10,9 @@
     <string name="description">DESCRIPTION</string>
     <string name="published_at">PUBLISHED AT</string>
     <string name="news_image">News image</string>
+    <string name="email">Email</string>
+    <string name="password">password</string>
+    <string name="create_account">create account</string>
+    <string name="login">login</string>
+    <string name="or">or</string>
 </resources>

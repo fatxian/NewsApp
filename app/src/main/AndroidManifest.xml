@@ -15,10 +15,7 @@
         android:theme="@style/splashScreenTheme">
         <activity
             android:name=".ui.MainActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.NewsActivity"
-            android:exported="true">
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
