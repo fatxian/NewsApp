@@ -116,7 +116,7 @@ class NewsViewModel(
         searchNews.postValue(Resource.Loading())
         try {
             if(hasInternetConnection()) {
-                val response = newsRepository.getBreakingNews(searchQuery, searchNewsPage)
+                val response = newsRepository.searchNews(searchQuery, searchNewsPage)
                 searchNews.postValue(handleSearchNewsResponse(response))
             }else{
                 searchNews.postValue(Resource.Error("No internet connection"))

@@ -8,7 +8,7 @@ import retrofit2.http.Query
 
 interface NewsApi {
 
-    @GET("v2/top-headlines")  //因為想要讓funtion異步，所以使用coroutine
+    @GET("v2/top-headlines")  //因為想要讓function異步，所以使用coroutine
     suspend fun getBreakingNews(
         @Query("country")
         countryCode: String = "us",
