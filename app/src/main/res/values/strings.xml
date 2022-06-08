@@ -11,8 +11,10 @@
     <string name="published_at">PUBLISHED AT</string>
     <string name="news_image">News image</string>
     <string name="email">Email</string>
-    <string name="password">password</string>
-    <string name="create_account">create account</string>
-    <string name="login">login</string>
-    <string name="or">or</string>
+    <string name="password">Password</string>
+    <string name="create_account">Create Account</string>
+    <string name="login">Login</string>
+    <string name="news_app">News App</string>
+    <string name="dont_have_account_yet">Don\'t have an account yet?</string>
+    <string name="search">Search...</string>
 </resources>

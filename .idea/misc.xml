@@ -6,7 +6,10 @@
         <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/drawable-v24/ic_all_news.xml" value="0.38229166666666664" />
         <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/drawable-v24/ic_breaking_news.xml" value="0.4197916666666667" />
         <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/drawable-v24/ic_favorite.xml" value="0.38229166666666664" />
+        <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.4197916666666667" />
+        <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/drawable/email.xml" value="0.4197916666666667" />
         <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.4197916666666667" />
+        <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/drawable/ic_launcher_background.xml" value="0.4197916666666667" />
         <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/drawable/ic_search.xml" value="0.4197916666666667" />
         <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/drawable/ic_search_24.xml" value="0.4197916666666667" />
         <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/drawable/splash_image.xml" value="0.4197916666666667" />
@@ -15,7 +18,7 @@
         <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/layout/fragment_article.xml" value="0.2826086956521739" />
         <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/layout/fragment_breaking_news.xml" value="0.2826086956521739" />
         <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/layout/fragment_create_acc.xml" value="0.2035623409669211" />
-        <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/layout/fragment_login.xml" value="0.2010178117048346" />
+        <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/layout/fragment_login.xml" value="0.264" />
         <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/layout/fragment_main.xml" value="0.4036458333333333" />
         <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/layout/fragment_saved_news.xml" value="0.2826086956521739" />
         <entry key="..\:/AndroidPratice/kotlinpratice/MVVMNewsApp/app/src/main/res/layout/fragment_search_news.xml" value="0.4" />

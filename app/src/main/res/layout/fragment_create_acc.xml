@@ -15,36 +15,55 @@
         app:layout_constraintTop_toTopOf="parent"
         android:padding="20dp">
 
-        <AutoCompleteTextView
-            android:id="@+id/et_email_create"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layout_email_create"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/email"
-            android:inputType="textEmailAddress"
-            android:maxLines="1"
+            app:startIconDrawable="@drawable/ic_baseline_email_24"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <EditText
-            android:id="@+id/et_password_create"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_email_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:maxLines="1" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layout_password_create"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/password"
-            android:inputType="textPassword"
-            android:maxLines="1"
+            app:startIconDrawable="@drawable/ic_baseline_key_24"
+            app:endIconMode="password_toggle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/et_email_create" />
+            app:layout_constraintTop_toBottomOf="@+id/layout_email_create"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_password_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:maxLines="1" />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/btn_create_acc_create"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/create_account"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/et_password_create" />
+            app:layout_constraintTop_toBottomOf="@+id/layout_password_create"
+            android:layout_marginTop="8dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
