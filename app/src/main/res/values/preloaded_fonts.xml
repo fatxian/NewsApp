@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <array name="preloaded_fonts" translatable="false">
+        <item>@font/akaya_telivigala</item>
+        <item>@font/architects_daughter</item>
+        <item>@font/archivo_black</item>
         <item>@font/roboto</item>
         <item>@font/roboto_bold</item>
+        <item>@font/sedgwick_ave</item>
     </array>
 </resources>
