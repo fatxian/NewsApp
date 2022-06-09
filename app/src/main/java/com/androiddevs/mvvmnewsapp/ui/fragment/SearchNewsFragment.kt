@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AbsListView
 import android.widget.Toast
+import androidx.core.view.updatePadding
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -15,6 +16,7 @@ import com.androiddevs.mvvmnewsapp.R
 import com.androiddevs.mvvmnewsapp.adapter.NewsAdapter
 import com.androiddevs.mvvmnewsapp.db.ArticleDatabase
 import com.androiddevs.mvvmnewsapp.repository.NewsRepository
+import com.androiddevs.mvvmnewsapp.ui.MainActivity
 import com.androiddevs.mvvmnewsapp.ui.NewsViewModel
 import com.androiddevs.mvvmnewsapp.ui.NewsViewModelProviderFactory
 import com.androiddevs.mvvmnewsapp.util.Constants
@@ -41,6 +43,8 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
+
+        layout_search.updatePadding(top = (requireActivity() as MainActivity).getStatusBarHeight())
 
         //點擊文章
         newsAdapter.setOnItemClickListener {
