@@ -10,7 +10,9 @@ class RetrofitInstance {
 
     companion object {
 
-        private val retrofit by lazy {
+        private val retrofit by lazy { //lazy只有第一次使用到時才創建
+            //logging interceptor is able to see which requests we are actually making and what the
+            //response are
             val logging = HttpLoggingInterceptor()
             logging.setLevel(HttpLoggingInterceptor.Level.BODY)
             val client = OkHttpClient.Builder()

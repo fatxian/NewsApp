@@ -1,6 +1,7 @@
 package com.androiddevs.mvvmnewsapp.ui.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -17,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import kotlin.math.log
 
 class LoginFragment: Fragment(R.layout.fragment_login) {
 
@@ -30,6 +32,7 @@ class LoginFragment: Fragment(R.layout.fragment_login) {
         user = Firebase.auth.currentUser
 
         if(user != null) {
+            Log.e("MainActivity", "123")
             findNavController().navigate(
                 R.id.action_loginFragment_to_mainFragment
             )
