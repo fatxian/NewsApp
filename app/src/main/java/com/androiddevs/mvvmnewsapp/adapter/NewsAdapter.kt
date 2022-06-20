@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -23,7 +24,7 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
     //因為這邊用的是已廢棄的kotlin extension，所以view holder不用寫東西去參照
     inner class ArticleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
-    //用於常刷新列表，讓列表不用反覆的整個刷新
+    //diffUtil用於常刷新列表，讓列表不用反覆的整個刷新
     private val differCallback = object : DiffUtil.ItemCallback<Article>() {
         override fun areItemsTheSame(oldItem: Article, newItem: Article): Boolean {
             return oldItem.url == newItem.url  //通常是.id，但我們api上的資源沒有id
@@ -70,6 +71,7 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
 
             setOnClickListener {
                 onItemClickListener?.let { it(article) }
+               //onItemClickListener?.invoke(article)
             }
         }
     }

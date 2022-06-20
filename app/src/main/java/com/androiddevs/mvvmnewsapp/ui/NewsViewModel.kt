@@ -36,7 +36,6 @@ class NewsViewModel(
         getBreakingNews("us")
     }
 
-    //repository的getBreakingNews是suspend fun，這邊不希望是suspend fun，所以用viewModelScope
     //viewModelScope will make sure that this coroutine is stay alive as long as
     //our view model is alive
     fun getBreakingNews(countryCode: String) = viewModelScope.launch {
