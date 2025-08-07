@@ -30,12 +30,20 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * Fragment for searching news articles.
+ * It provides a search input field, displays search results in a RecyclerView,
+ * implements search debouncing, and supports pagination.
+ */
 class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
 
+    // ViewModel shared with the hosting Activity.
+    // This ensures data survives configuration changes and can be shared between fragments.
     private val viewModel by activityViewModels<NewsViewModel>{
         val newsRepository = NewsRepository(ArticleDatabase(requireContext()))
         NewsViewModelProviderFactory(requireActivity().application, newsRepository)
     }
+    // Adapter for the RecyclerView
     lateinit var newsAdapter: NewsAdapter
 
     val TAG = "SearchNewsFragment"
@@ -44,42 +52,46 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
 
+        // Adjust the top padding of the search layout to account for the status bar height.
         layout_search.updatePadding(top = (requireActivity() as MainActivity).getStatusBarHeight())
 
-        //點擊文章
-        newsAdapter.setOnItemClickListener {
-            //take article put it into a bundle then attach this bundle to our navigation components
-            //so that the navigation components will handle the transition for us and pass the arguments
-            //to our article fragment
+        // Set a click listener for items in the RecyclerView
+        newsAdapter.setOnItemClickListener { article ->
+            // Create a bundle to pass the selected article to the ArticleFragment
             val bundle = Bundle().apply {
-                putSerializable("article", it)
+                putSerializable("article", article)
             }
+            // Navigate to the ArticleFragment, passing the bundle
             findNavController().navigate(
                 R.id.action_searchNewsFragment_to_articleFragment,
                 bundle
             )
         }
 
-        //search功能，希望搜尋有延遲，不會每打一個字就搜一次，利用coroutine可以辦到
+        // Implement search debouncing using coroutines.
+        // This prevents making an API call for every character typed.
         var job: Job? = null
         etSearch.addTextChangedListener { editable ->
-            job?.cancel()
+            job?.cancel() // Cancel any previous search job
             job = MainScope().launch {
-                delay(SEARCH_NEWS_TIME_DELAY)
+                delay(SEARCH_NEWS_TIME_DELAY) // Wait for a short delay after typing stops
                 editable?.let {
                     if (editable.toString().isNotEmpty()) {
-                        viewModel.searchNews(editable.toString())
+                        viewModel.searchNews(editable.toString()) // Trigger search
                     }
                 }
             }
         }
 
+        // Observe the searchNews LiveData from the ViewModel
         viewModel.searchNews.observe(viewLifecycleOwner, Observer { response ->
             when (response) {
+                // On success, hide progress bar and submit the list to the adapter
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
-                        newsAdapter.differ.submitList(newsResponse.articles)
+                        newsAdapter.differ.submitList(newsResponse.articles.toList())
+                        // Calculate total pages and check if it's the last page for pagination
                         val totalPages = newsResponse.totalResults / Constants.QUERY_PAGE_SIZE + 2
                         isLastPage = viewModel.searchNewsPage == totalPages
                         if (isLastPage) {
@@ -87,19 +99,20 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                         }
                     }
                 }
+                // On error, hide progress bar and show a toast message
                 is Resource.Error -> {
                     hideProgressBar()
-                    response.message?.let { message ->
-                        Toast.makeText(activity, "An error occurred: $message", Toast.LENGTH_LONG)
+                    response.message?.let {
+                        Toast.makeText(activity, "An error occurred: $it", Toast.LENGTH_LONG)
                             .show()
                     }
                 }
+                // On loading, show the progress bar
                 is Resource.Loading -> {
                     showProgressBar()
                 }
             }
         })
-
     }
 
     private fun hideProgressBar() {
@@ -112,20 +125,23 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
         isLoading = true
     }
 
-    //往下滑增加新聞頁面
+    // --- Pagination Logic ---
     var isLoading = false
     var isLastPage = false
     var isScrolling = false
 
+    // Scroll listener for the RecyclerView to implement pagination
     val scrollListener = object : RecyclerView.OnScrollListener() {
-        //ctrl+o
+        // Called when the scroll state changes (e.g., start scrolling, stop scrolling).
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
-            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) { //正在滑動
+            // Check if the user is currently scrolling by touching the screen.
+            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
                 isScrolling = true
             }
         }
 
+        // Called while the RecyclerView is being scrolled.
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
 
@@ -138,23 +154,29 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
             val isAtLastItem = firstVisibleItemPosition + visibleItemCount >= totalItemCount
             val isNotAtBeginning = firstVisibleItemPosition >= 0
             val isTotalMoreThanVisible = totalItemCount >= Constants.QUERY_PAGE_SIZE
+            // Determine if we should paginate based on the scroll position and state.
             val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isNotAtBeginning &&
                     isTotalMoreThanVisible && isScrolling
             if (shouldPaginate) {
+                // Fetch the next page of search results from the ViewModel.
                 viewModel.searchNews(etSearch.text.toString())
                 isScrolling = false
             }
         }
     }
 
+    /**
+     * Initializes the RecyclerView, sets its adapter and layout manager,
+     * and attaches the scroll listener for pagination.
+     */
     private fun setupRecyclerView() {
         newsAdapter = NewsAdapter()
         rvSearchNews.apply {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
+            // Attach the custom scroll listener to the RecyclerView.
             addOnScrollListener(this@SearchNewsFragment.scrollListener)
         }
     }
-
 }
 
