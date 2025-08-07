@@ -31,6 +31,7 @@ class NewsViewModel(
     val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var searchNewsPage = 1
     var searchNewsResponse: NewsResponse? = null
+    var lastSearchQuery: String? = null // Add this to keep track of the last search query
 
     init {
         getBreakingNews("us")
@@ -43,6 +44,12 @@ class NewsViewModel(
     }
 
     fun searchNews(searchQuery: String) = viewModelScope.launch {
+        // If the search query is new, reset pagination and previous results
+        if (searchQuery != lastSearchQuery) {
+            searchNewsPage = 1
+            searchNewsResponse = null
+            lastSearchQuery = searchQuery
+        }
         safeSearchNewsCall(searchQuery)
     }
 

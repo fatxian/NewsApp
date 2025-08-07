@@ -19,15 +19,22 @@ import com.androiddevs.mvvmnewsapp.ui.NewsViewModelProviderFactory
 import com.androiddevs.mvvmnewsapp.util.Constants.Companion.QUERY_PAGE_SIZE
 import com.androiddevs.mvvmnewsapp.util.Resource
 import kotlinx.android.synthetic.main.fragment_breaking_news.*
-import kotlinx.android.synthetic.main.fragment_search_news.*
 import kotlinx.android.synthetic.main.fragment_search_news.paginationProgressBar
 
+/**
+ * Fragment to display breaking news articles.
+ * It uses a RecyclerView to show a list of articles and implements pagination
+ * to load more articles as the user scrolls.
+ */
 class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
-    private val viewModel by activityViewModels<NewsViewModel>{
+    // ViewModel shared with the hosting Activity.
+    // This ensures data survives configuration changes and can be shared between fragments.
+    private val viewModel by activityViewModels<NewsViewModel> {
         val newsRepository = NewsRepository(ArticleDatabase(requireContext()))
         NewsViewModelProviderFactory(requireActivity().application, newsRepository)
     }
+    // Adapter for the RecyclerView
     lateinit var newsAdapter: NewsAdapter
 
     val TAG = "BreakingNewsFragment"
@@ -36,27 +43,28 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
 
-        //點擊文章
-        newsAdapter.setOnItemClickListener {
-            //take article put it into a bundle then attach this bundle to our navigation components
-            //so that the navigation components will handle the transition for us and pass the arguments
-            //to our article fragment
+        // Set a click listener for items in the RecyclerView
+        newsAdapter.setOnItemClickListener { article ->
+            // Create a bundle to pass the selected article to the ArticleFragment
             val bundle = Bundle().apply {
-                putSerializable("article", it)
+                putSerializable("article", article)
             }
-
+            // Navigate to the ArticleFragment, passing the bundle
             findNavController().navigate(
                 R.id.action_breakingNewsFragment_to_articleFragment,
                 bundle
             )
         }
 
+        // Observe the breakingNews LiveData from the ViewModel
         viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
             when (response) {
+                // On success, hide progress bar and submit the list to the adapter
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
-                        newsAdapter.differ.submitList(newsResponse.articles)
+                        newsAdapter.differ.submitList(newsResponse.articles.toList())
+                        // Calculate total pages and check if it's the last page
                         val totalPages = newsResponse.totalResults / QUERY_PAGE_SIZE + 2
                         isLastPage = viewModel.breakingNewsPage == totalPages
                         if (isLastPage) {
@@ -64,6 +72,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
                         }
                     }
                 }
+                // On error, hide progress bar and show a toast message
                 is Resource.Error -> {
                     hideProgressBar()
                     response.message?.let { message ->
@@ -71,12 +80,12 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
                             .show()
                     }
                 }
+                // On loading, show the progress bar
                 is Resource.Loading -> {
                     showProgressBar()
                 }
             }
         })
-
     }
 
     private fun hideProgressBar() {
@@ -89,20 +98,23 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
         isLoading = true
     }
 
-    //往下滑增加新聞頁面
+    // --- Pagination Logic ---
     var isLoading = false
     var isLastPage = false
     var isScrolling = false
 
-    val scrollListener = object : RecyclerView.OnScrollListener() {
-        //ctrl+o
+    // Scroll listener for the RecyclerView to implement pagination
+    private val scrollListener = object : RecyclerView.OnScrollListener() {
+        // Called when the scroll state changes (e.g., start scrolling, stop scrolling).
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
-            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) { //正在滑動
+            // Check if the user is currently scrolling by touching the screen.
+            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
                 isScrolling = true
             }
         }
 
+        // Called while the RecyclerView is being scrolled.
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
 
@@ -115,22 +127,28 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
             val isAtLastItem = firstVisibleItemPosition + visibleItemCount >= totalItemCount
             val isNotAtBeginning = firstVisibleItemPosition >= 0
             val isTotalMoreThanVisible = totalItemCount >= QUERY_PAGE_SIZE
+            // Determine if we should paginate based on the scroll position and state.
             val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isNotAtBeginning &&
                     isTotalMoreThanVisible && isScrolling
             if (shouldPaginate) {
+                // Fetch the next page of news from the ViewModel.
                 viewModel.getBreakingNews("us")
                 isScrolling = false
             }
         }
     }
 
+    /**
+     * Initializes the RecyclerView, sets its adapter and layout manager,
+     * and attaches the scroll listener for pagination.
+     */
     private fun setupRecyclerView() {
         newsAdapter = NewsAdapter()
         rvBreakingNews.apply {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
+            // Attach the custom scroll listener to the RecyclerView.
             addOnScrollListener(this@BreakingNewsFragment.scrollListener)
         }
     }
-
 }

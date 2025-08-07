@@ -18,53 +18,61 @@ import com.androiddevs.mvvmnewsapp.ui.NewsViewModelProviderFactory
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_saved_news.*
 
+/**
+ * Fragment to display saved news articles from the local database.
+ * It allows users to view saved articles, navigate to their details,
+ * and delete them using a swipe-to-delete gesture.
+ */
 class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
 
+    // ViewModel shared with the hosting Activity.
+    // This ensures data survives configuration changes and can be shared between fragments.
     private val viewModel by activityViewModels<NewsViewModel>{
         val newsRepository = NewsRepository(ArticleDatabase(requireContext()))
         NewsViewModelProviderFactory(requireActivity().application, newsRepository)
     }
+    // Adapter for the RecyclerView
     lateinit var newsAdapter: NewsAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
 
-        //點擊文章
+        // Set a click listener for items in the RecyclerView
         newsAdapter.setOnItemClickListener {
-            //take article put it into a bundle then attach this bundle to our navigation components
-            //so that the navigation components will handle the transition for us and pass the arguments
-            //to our article fragment
+            // Create a bundle to pass the selected article to the ArticleFragment
             val bundle = Bundle().apply {
                 putSerializable("article", it)
             }
+            // Navigate to the ArticleFragment, passing the bundle
             findNavController().navigate(
                 R.id.action_savedNewsFragment_to_articleFragment,
                 bundle
             )
         }
 
-        //滑動以刪除
+        // Configure ItemTouchHelper for swipe-to-delete functionality
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN, // Drag directions (not used here)
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT // Swipe directions
         ) {
-            //ctrl+i
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
             ): Boolean {
-                return true
+                return true // Not implementing move functionality
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
                 val article = newsAdapter.differ.currentList[position]
+                // Delete the article from the database via the ViewModel
                 viewModel.deleteArticle(article)
-                //snack bar可以undo
+                // Show a Snackbar with an undo option
                 Snackbar.make(view, "Successfully deleted article", Snackbar.LENGTH_LONG).apply {
                     setAction("Undo") {
+                        // If "Undo" is clicked, re-save the article
                         viewModel.saveArticle(article)
                     }
                     show()
@@ -72,14 +80,16 @@ class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
             }
         }
 
+        // Attach the ItemTouchHelper to the RecyclerView
         ItemTouchHelper(itemTouchHelperCallback).apply {
             attachToRecyclerView(rvSavedNews)
         }
 
-        //觀察已存文章並刷新
+        // Observe the LiveData of saved news from the ViewModel
+        // and update the RecyclerView adapter when data changes.
         viewModel.getSavedNews().observe(viewLifecycleOwner, Observer { articles ->
             newsAdapter.differ.submitList(articles)
-            //如果沒東西，顯示文字
+            // Show/hide "nothing here" text based on whether there are saved articles
             if(articles.isNotEmpty()){
                 tv_nothing_here.visibility = View.INVISIBLE
             }else {
@@ -88,6 +98,9 @@ class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
         })
     }
 
+    /**
+     * Initializes the RecyclerView, sets its adapter and layout manager.
+     */
     private fun setupRecyclerView() {
         newsAdapter = NewsAdapter()
         rvSavedNews.apply {
@@ -95,5 +108,4 @@ class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
             layoutManager = LinearLayoutManager(activity)
         }
     }
-
 }
