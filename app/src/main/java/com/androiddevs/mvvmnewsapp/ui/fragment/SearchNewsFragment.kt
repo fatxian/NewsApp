@@ -8,7 +8,6 @@ import androidx.core.view.updatePadding
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,9 +21,10 @@ import com.androiddevs.mvvmnewsapp.ui.NewsViewModelProviderFactory
 import com.androiddevs.mvvmnewsapp.util.Constants
 import com.androiddevs.mvvmnewsapp.util.Constants.Companion.SEARCH_NEWS_TIME_DELAY
 import com.androiddevs.mvvmnewsapp.util.Resource
-import kotlinx.android.synthetic.main.fragment_breaking_news.*
 import kotlinx.android.synthetic.main.fragment_breaking_news.paginationProgressBar
-import kotlinx.android.synthetic.main.fragment_search_news.*
+import kotlinx.android.synthetic.main.fragment_search_news.etSearch
+import kotlinx.android.synthetic.main.fragment_search_news.layout_search
+import kotlinx.android.synthetic.main.fragment_search_news.rvSearchNews
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -84,7 +84,7 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
         }
 
         // Observe the searchNews LiveData from the ViewModel
-        viewModel.searchNews.observe(viewLifecycleOwner, Observer { response ->
+        viewModel.searchNews.observe(viewLifecycleOwner) { response ->
             when (response) {
                 // On success, hide progress bar and submit the list to the adapter
                 is Resource.Success -> {
@@ -112,7 +112,7 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                     showProgressBar()
                 }
             }
-        })
+        }
     }
 
     private fun hideProgressBar() {

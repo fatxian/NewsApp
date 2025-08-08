@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -87,15 +86,15 @@ class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
 
         // Observe the LiveData of saved news from the ViewModel
         // and update the RecyclerView adapter when data changes.
-        viewModel.getSavedNews().observe(viewLifecycleOwner, Observer { articles ->
+        viewModel.getSavedNews().observe(viewLifecycleOwner) { articles ->
             newsAdapter.differ.submitList(articles)
             // Show/hide "nothing here" text based on whether there are saved articles
-            if(articles.isNotEmpty()){
+            if (articles.isNotEmpty()) {
                 tv_nothing_here.visibility = View.INVISIBLE
-            }else {
+            } else {
                 tv_nothing_here.visibility = View.VISIBLE
             }
-        })
+        }
     }
 
     /**
