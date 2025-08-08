@@ -6,7 +6,6 @@ import android.widget.AbsListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -57,7 +56,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
         }
 
         // Observe the breakingNews LiveData from the ViewModel
-        viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
+        viewModel.breakingNews.observe(viewLifecycleOwner) { response ->
             when (response) {
                 // On success, hide progress bar and submit the list to the adapter
                 is Resource.Success -> {
@@ -85,7 +84,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
                     showProgressBar()
                 }
             }
-        })
+        }
     }
 
     private fun hideProgressBar() {

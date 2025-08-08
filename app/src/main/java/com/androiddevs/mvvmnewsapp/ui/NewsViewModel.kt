@@ -18,31 +18,48 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 import java.io.IOException
 
+/**
+ * ViewModel for news-related data.
+ * It is responsible for preparing and managing the data for the UI.
+ * It communicates with the NewsRepository to fetch and save data.
+ */
 class NewsViewModel(
     app: Application,
     val newsRepository: NewsRepository
 ) : AndroidViewModel(app) {
 
-    //api
+    // LiveData for breaking news from the API
     val breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
+    // Current page for breaking news pagination
     var breakingNewsPage = 1
+    // Holds the response for breaking news to handle pagination
     var breakingNewsResponse: NewsResponse? = null
 
     val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var searchNewsPage = 1
     var searchNewsResponse: NewsResponse? = null
-    var lastSearchQuery: String? = null // Add this to keep track of the last search query
+    // Keeps track of the last search query to reset pagination on new search
+    var lastSearchQuery: String? = null
 
     init {
+        // Fetch breaking news for the US on initialization
         getBreakingNews("us")
     }
 
-    //viewModelScope will make sure that this coroutine is stay alive as long as
-    //our view model is alive
+    /**
+     * Fetches breaking news from the repository.
+     * viewModelScope ensures the coroutine lives as long as the ViewModel.
+     * @param countryCode The country code to fetch news for (e.g., "us").
+     */
     fun getBreakingNews(countryCode: String) = viewModelScope.launch {
         safeBreakingNewsCall(countryCode)
     }
 
+    /**
+     * Searches for news based on a query.
+     * Resets pagination if the search query is new.
+     * @param searchQuery The query to search for.
+     */
     fun searchNews(searchQuery: String) = viewModelScope.launch {
         // If the search query is new, reset pagination and previous results
         if (searchQuery != lastSearchQuery) {
@@ -53,14 +70,22 @@ class NewsViewModel(
         safeSearchNewsCall(searchQuery)
     }
 
+    /**
+     * Handles the response from the breaking news API call.
+     * Manages pagination by appending new articles to the existing list.
+     * @param response The response from the Retrofit API call.
+     * @return A Resource object representing the state (Success or Error).
+     */
     private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
-                //持續往下滑增加新聞
+                // Increment page number for the next request
                 breakingNewsPage++
+                // If it's the first page, set the response directly
                 if (breakingNewsResponse == null) {
                     breakingNewsResponse = resultResponse
                 } else {
+                    // Append new articles to the old list
                     val oldArticles = breakingNewsResponse?.articles
                     val newArticles = resultResponse.articles
                     oldArticles?.addAll(newArticles)
@@ -71,10 +96,15 @@ class NewsViewModel(
         return Resource.Error(response.message())
     }
 
+    /**
+     * Handles the response from the search news API call.
+     * Manages pagination for search results.
+     * @param response The response from the Retrofit API call.
+     * @return A Resource object representing the state (Success or Error).
+     */
     private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
-                //持續往下滑增加新聞
                 searchNewsPage++
                 if (searchNewsResponse == null) {
                     searchNewsResponse = resultResponse
@@ -89,53 +119,76 @@ class NewsViewModel(
         return Resource.Error(response.message())
     }
 
-    //room(dao)
+    /**
+     * Saves an article to the local database.
+     * @param article The article to be saved.
+     */
     fun saveArticle(article: Article) = viewModelScope.launch {
         newsRepository.upsert(article)
     }
 
+    /**
+     * Retrieves all saved news articles from the database.
+     * @return LiveData list of articles.
+     */
     fun getSavedNews() = newsRepository.getSavedNews()
 
+    /**
+     * Deletes an article from the local database.
+     * @param article The article to be deleted.
+     */
     fun deleteArticle(article: Article) = viewModelScope.launch {
         newsRepository.deleteArticle(article)
     }
 
-    //安全
+    /**
+     * A safe wrapper for the breaking news API call.
+     * Checks for internet connection and handles exceptions.
+     * @param countryCode The country code for the news.
+     */
     private suspend fun safeBreakingNewsCall(countryCode: String) {
         breakingNews.postValue(Resource.Loading())
         try {
             if(hasInternetConnection()) {
-                val response = newsRepository.searchNews(countryCode, breakingNewsPage)
+                val response = newsRepository.getBreakingNews(countryCode, breakingNewsPage)
                 breakingNews.postValue(handleBreakingNewsResponse(response))
-            }else{
+            } else {
                 breakingNews.postValue(Resource.Error("No internet connection"))
             }
         } catch (t: Throwable) {
             when(t) {
                 is IOException -> breakingNews.postValue(Resource.Error("Network Failure"))
-                else -> breakingNews.postValue(Resource.Error("Conversion Error")) //json轉換失敗
+                else -> breakingNews.postValue(Resource.Error("Conversion Error")) // JSON parsing error
             }
         }
     }
 
+    /**
+     * A safe wrapper for the search news API call.
+     * Checks for internet connection and handles exceptions.
+     * @param searchQuery The query to search for.
+     */
     private suspend fun safeSearchNewsCall(searchQuery: String) {
         searchNews.postValue(Resource.Loading())
         try {
             if(hasInternetConnection()) {
                 val response = newsRepository.searchNews(searchQuery, searchNewsPage)
                 searchNews.postValue(handleSearchNewsResponse(response))
-            }else{
+            } else {
                 searchNews.postValue(Resource.Error("No internet connection"))
             }
         } catch (t: Throwable) {
             when(t) {
                 is IOException -> searchNews.postValue(Resource.Error("Network Failure"))
-                else -> searchNews.postValue(Resource.Error("Conversion Error")) //json轉換失敗
+                else -> searchNews.postValue(Resource.Error("Conversion Error")) // JSON parsing error
             }
         }
     }
 
-    //檢查網路
+    /**
+     * Checks if the device has an active internet connection.
+     * @return True if connected, false otherwise.
+     */
     private fun hasInternetConnection(): Boolean {
         val connectivityManager = getApplication<NewsApplication>().getSystemService(
             Context.CONNECTIVITY_SERVICE
@@ -151,7 +204,8 @@ class NewsViewModel(
                 else -> false
             }
         } else {
-            //此作法已廢棄，所以只應用在版本23以下(M)
+            // Used for older Android versions below Marshmallow (API 23)
+            @Suppress("DEPRECATION")
             connectivityManager.activeNetworkInfo?.run {
                 return when (type) {
                     TYPE_WIFI -> true

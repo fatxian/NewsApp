@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.View
 import android.webkit.WebViewClient
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.marginTop
-import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
@@ -16,8 +14,8 @@ import com.androiddevs.mvvmnewsapp.ui.MainActivity
 import com.androiddevs.mvvmnewsapp.ui.NewsViewModel
 import com.androiddevs.mvvmnewsapp.ui.NewsViewModelProviderFactory
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.fragment_article.*
-import kotlinx.android.synthetic.main.fragment_search_news.*
+import kotlinx.android.synthetic.main.fragment_article.fab
+import kotlinx.android.synthetic.main.fragment_article.webView
 
 /**
  * A Fragment that displays a single news article using a WebView.
