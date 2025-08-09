@@ -1,15 +1,20 @@
 package com.androiddevs.mvvmnewsapp.util
 
-//used to wrap around our network response
-//differentiate between successful and error response
-//handle the loading state so when we make a response that we can show on a progress bar
-
-//sealed class可以定義有哪些class可以繼承他，例如這裡的success、error、loading class
+/**
+ * A generic sealed class that represents the state of data being loaded from a source.
+ * It is used to wrap network responses to differentiate between success, error, and loading states.
+ * @param T The type of the data being held.
+ */
 sealed class Resource<T>(
     val data: T? = null,
     val message: String? = null
 ) {
+    /** Represents a successful state with data. */
     class Success<T>(data: T) : Resource<T>(data)
+
+    /** Represents an error state with a message and optional data. */
     class Error<T>(message: String, data: T? = null) : Resource<T>(data, message)
+
+    /** Represents the loading state. */
     class Loading<T> : Resource<T>()
 }

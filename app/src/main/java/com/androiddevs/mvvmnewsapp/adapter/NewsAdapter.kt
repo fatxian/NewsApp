@@ -1,11 +1,9 @@
 package com.androiddevs.mvvmnewsapp.adapter
 
 import android.text.format.DateUtils
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -15,27 +13,36 @@ import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.item_article_preview.view.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.*
 
+/**
+ * RecyclerView Adapter for displaying a list of news articles.
+ */
 class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
 
-    //因為這邊用的是已廢棄的kotlin extension，所以view holder不用寫東西去參照
+    /**
+     * ViewHolder holds the views for a single list item.
+     * Note: This class is empty because it uses Kotlin Android Extensions for view access, which is now deprecated.
+     */
     inner class ArticleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
-    //diffUtil用於常刷新列表，讓列表不用反覆的整個刷新
+    // DiffUtil calculates the difference between two lists to efficiently update the RecyclerView.
     private val differCallback = object : DiffUtil.ItemCallback<Article>() {
         override fun areItemsTheSame(oldItem: Article, newItem: Article): Boolean {
-            return oldItem.url == newItem.url  //通常是.id，但我們api上的資源沒有id
+            // Articles are considered the same if their URLs are identical.
+            return oldItem.url == newItem.url
         }
 
         override fun areContentsTheSame(oldItem: Article, newItem: Article): Boolean {
+            // Since Article is a data class, `==` checks for content equality.
             return oldItem == newItem
         }
     }
+
+    // AsyncListDiffer computes the diff on a background thread.
     val differ = AsyncListDiffer(this, differCallback)
 
+    /** Creates a new ViewHolder when the RecyclerView needs one. */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleViewHolder {
         return ArticleViewHolder(
             LayoutInflater.from(parent.context).inflate(
@@ -46,38 +53,40 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
         )
     }
 
+    /** Returns the total number of items in the list. */
     override fun getItemCount(): Int {
         return differ.currentList.size
     }
 
+    /** Binds the data from an Article object to the views in the ViewHolder. */
     override fun onBindViewHolder(holder: ArticleViewHolder, position: Int) {
         val article = differ.currentList[position]
         holder.itemView.apply {
-            //image
+            // Load the article image using Glide.
             Glide.with(this).load(article.urlToImage).into(ivArticleImage)
-            //kotlin extension
+            // Set the text for the views.
             tvSource.text = article.source?.name
             tvTitle.text = article.title
             tvDescription.text = article.description
-            //tvPublishedAt.text = article.publishedAt
 
+            // Parse and format the publication date to a "time ago" format.
             val dateFormatter: DateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
             val date: Date = dateFormatter.parse(article.publishedAt!!)!!
             val dateLong = date.time
-            //1 hour age...
-            val timeAgo = DateUtils.getRelativeTimeSpanString(
-                dateLong) as String
+            val timeAgo = DateUtils.getRelativeTimeSpanString(dateLong) as String
             tvPublishedAt.text = timeAgo
 
+            // Set the click listener for the item.
             setOnClickListener {
                 onItemClickListener?.let { it(article) }
-               //onItemClickListener?.invoke(article)
             }
         }
     }
 
+    // A lambda function to handle item clicks, passed from the Fragment/Activity.
     private var onItemClickListener: ((Article) -> Unit)? = null
 
+    /** Public function to set the click listener from outside the adapter. */
     fun setOnItemClickListener(listener: (Article) -> Unit) {
         onItemClickListener = listener
     }
