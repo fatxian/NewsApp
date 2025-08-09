@@ -29,6 +29,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import android.view.ViewGroup
 
 /**
  * Fragment for searching news articles.
@@ -52,8 +53,10 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
 
-        // Adjust the top padding of the search layout to account for the status bar height.
-        layout_search.updatePadding(top = (requireActivity() as MainActivity).getStatusBarHeight())
+        // Adjust the top margin of the search layout to account for the status bar height.
+        val params = layout_search.layoutParams as ViewGroup.MarginLayoutParams
+        params.topMargin = (requireActivity() as MainActivity).getStatusBarHeight()
+        layout_search.layoutParams = params
 
         // Set a click listener for items in the RecyclerView
         newsAdapter.setOnItemClickListener { article ->
@@ -90,7 +93,13 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
-                        newsAdapter.differ.submitList(newsResponse.articles.toList())
+                        // Safely scroll to top by posting the scroll command in the submitList callback.
+                        // This ensures both data and layout are ready, preventing race conditions.
+                        newsAdapter.differ.submitList(newsResponse.articles.toList()){
+                            rvSearchNews.post {
+                                rvSearchNews.scrollToPosition(0)
+                            }
+                        }
                         // Calculate total pages and check if it's the last page for pagination
                         val totalPages = newsResponse.totalResults / Constants.QUERY_PAGE_SIZE + 2
                         isLastPage = viewModel.searchNewsPage == totalPages
