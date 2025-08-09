@@ -1,3 +1,12 @@
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+     localPropertiesFile.withReader('UTF-8') { reader ->
+         localProperties.load(reader)
+     }
+}
+
+
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
@@ -17,7 +26,10 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
+
+        buildConfigField "String", "NEWS_API_KEY", "\"${localProperties.getProperty('NEWS_API_KEY')}\""
+
+}
 
     buildTypes {
         release {
